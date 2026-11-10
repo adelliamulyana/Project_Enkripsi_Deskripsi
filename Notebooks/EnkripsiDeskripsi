@@ -1,0 +1,70 @@
+import random
+
+def random_perm(n):
+    p = list(range(n))
+    if n <= 1:
+        return p
+    
+    while True:
+        random.shuffle(p)
+        if p != list(range(n)):
+            break
+    return p
+
+def invert_perm(p):
+    inv = [0] * len(p)
+    for i, j in enumerate(p):
+        inv[j] = i
+    return inv
+
+def apply_perm(block, perm):
+    return ''.join(block[perm[i]] for i in range(len(block)))
+
+def pad_text(text, block_size, pad_symbol='$'):
+    if len(text) % block_size == 0:
+        return text
+    return text + pad_symbol * (block_size - len(text) % block_size)
+
+def encrypt(plaintext, min_block=2, max_block=10):
+    plaintext = plaintext.replace(" ", "#")
+    block_size = random.randint(min_block, max_block)
+    perm = random_perm(block_size)
+    padded_text = pad_text(plaintext, block_size)
+    
+    ciphertext = ""
+    for i in range(0, len(padded_text), block_size):
+        block = padded_text[i:i + block_size]
+        ciphertext += apply_perm(block, perm)
+        
+    return ciphertext, perm, block_size
+
+def decrypt(ciphertext, perm, block_size, pad_symbol='$'):
+    inv = invert_perm(perm)
+    
+    plaintext = ""
+    for i in range(0, len(ciphertext), block_size):
+        block = ciphertext[i:i + block_size]
+        plaintext += apply_perm(block, inv)
+    plaintext = plaintext.rstrip(pad_symbol)
+    return plaintext.replace("#", " ")
+if __name__ == "__main__":
+    print("  PROGRAM ENKRIPSI & DEKRIPSI TEKNIK PERMUTASI    ")
+    
+    text = input("Masukkan plaintext : ")
+    
+    if text.strip():
+        # Proses Enkripsi
+        cipher, perm, block_size = encrypt(text)
+        
+        print("\n=== HASIL ENKRIPSI ===")
+        print("Block Size  :", block_size)
+        print("Permutasi   :", perm)
+        print("Ciphertext  :", cipher)
+        
+        # Proses Dekripsi
+        decrypted = decrypt(cipher, perm, block_size)
+        
+        print("\n=== HASIL DEKRIPSI ===")
+        print("Hasil dekripsi:", decrypted)
+    else:
+        print("Plaintext tidak boleh kosong!")
